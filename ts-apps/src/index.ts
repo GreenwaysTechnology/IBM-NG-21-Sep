@@ -1,18 +1,29 @@
-//types and variable declaration
+// class Employee {
+//     //instance variables
+//     id: number;
+//     name: string;
+//     //id,name is local variable
+//     constructor(id: number, name: string) {
+//         //instancevariable:localvariable
+//         this.id = id;
+//         this.name = name;
+//     }
+// }
 
-let firstName: string = "Subramanian";
-//let lastName:string =100; //type error
-let lastName: string = "Murugan";
 
-//other types
-//numbers
-let salary: number = 100;
+// class Employee {
+//     //id,name is local variable,can be converted into instance variable by adding 
+//     //private or public
+//     constructor(public id: number, public name: string) {
+//         this.id = id;
+//         this.name = name;
+//     }
+// }
 
-//boolean
-let isValid: boolean = true;
-
-//undefined;
-// let qty: undefined;
-// qty = 100;
-//reinitlaztion
-salary = 100000;
+class Employee {
+    //id,name is local variable,can be converted into instance variable by adding 
+    //private or public
+    constructor(public id: number, public name: string) { }
+}
+let emp = new Employee(1, 'ram');
+console.log(`id : ${emp.id} name ${emp.name}`)
