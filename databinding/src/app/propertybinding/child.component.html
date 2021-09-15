@@ -1,0 +1,11 @@
+<div>
+    <h2>Data from Parent</h2>
+    <h3>String {{message}}</h3>
+    <h3>Object {{address?.city ?? "Default city"}}</h3>
+    <h3>Array</h3>
+    <ul>
+        <li *ngFor="let skill of myskills">
+            <span>{{skill}}</span>
+        </li>
+    </ul>
+</div>

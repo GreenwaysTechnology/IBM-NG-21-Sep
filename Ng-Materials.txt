@@ -499,7 +499,800 @@ Do use dashed-case or kebab-case for naming the element selectors of components.
 
 ............................................................................................
 
-Class Names:
+class Names:
+
+ 1.Noun
+ 2.should be meaningfull
+ 3.should have suffix component,service,directive,pipe
+
+ HeaderComponent
+ HeaderService
+ HeaderDirective
+ HeaderPipe
+..............................................................................................
+Steps to create Component
+
+1.declare componenent class
+2.declare component html 
+3.write component logic
+4.dependency injection inside moudle
+5.refer the compoent inside template.
+...........................................................................................
+
+Style guide to create components or any objects
+
+1.modularazation
+
+-physical modularity 
+   folders
+     files
+
+src
+  app
+   |
+   header
+     header files
+   footer
+     footer files
+   body 
+    body files
+
+-logical modularity 
+    object grouping
+ sub modules
+   header module 
+
+
+Steps:
+
+1.create folder
+2.create modules
+3.create components/directives/services 
+4.DI inside sub module
+
+
+Error: src/app/app.component.html:2:5 - error NG8001: 'app-header' is not a known element:
+1. If 'app-header' is an Angular component, then verify that it is part of this module.
+2. If 'app-header' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+2     <app-header></app-header>
+      ~~~~~~~~~~~~
+
+
+Module Scope:
+Any Component,Pipe,Directive,submodule refers inside a module will be available inside that module only. Module Scope
+
+
+Module Scope:
+
+1.public scope
+   if any objects belong to all modules that  is public
+2.private scope
+  if any objects belong to that module is private including appmodule.
+
+if you want to make any object in public scope, you need to configer it
+
+"exports: "
+..............................................................................................
+                       Angular CLI   Automate && accelerate your work flow
+.............................................................................................
+
+Problems in the dev flow:
+
+Tasks:
+
+1.create folder
+2.create files - component-ts,html,css,spec
+3.create module
+4.declare class -cmp,service...
+5.refer the classes inside module
+6.you need to inject submodule into main module..
+
+if you repeate the same thing for every object , which increases lot of time.
+
+Automation:
+ code generation automation
+
+angular cli tool to generate code.
+
+Generates and/or modifies files based on a schematic.
+
+ng generate <schematic> [options]
+ng g <schematic> [options]
+
+
+//create folder, create module, inject this module into app module
+>>ng g m footer --module=app
+CREATE src/app/footer/footer.module.ts (192 bytes)
+UPDATE src/app/app.module.ts (451 bytes)
+
+create component, inside footer folder, inject into footer module, make it available public
+i dont want css file,i want html file,i dontwant spec file
+
+ng g c footer/footer  --flat=true --export=true --inline-style=true --skip-tests=true   --module=footer
+
+
+ --flat=true :  create any thing inside exsiting folder
+ --export=true : make it public
+ --inline-style=true : i dont want css file
+ --skip-tests=true  :dont create spec files
+ --module=header  : inject inside header module
+
+ng g m body --module=app   
+ng g c body/body  --flat=true --export=true --inline-style=true --skip-tests=true   --module=body
+...............................................................................................				Data binding
+..............................................................................................
+
+UI types
+
+1.static ui
+   only html
+2.dynamic ui
+  html + data and which change by user interactions
+
+Data binding:
+ Transfering state to ui(view)
+
+Types of databinding
+
+1.interpolation
+2.property binding
+3.attribute binding
+4.event binding
+5.two way data binding
+6.class binding
+7.style binding
+
+...........................................................................................
+
+export type Address = {
+    city: string;
+}
+
+<h2>
+    Primitive Data
+</h2>
+<p>String {{firstName}} {{lastName}}</p>
+<p>Number {{salary}}</p>
+<p>Boolean {{status}}</p>
+<h2>
+    Object
+</h2>
+<p>Object {{address.city}}</p>
+
+<h2>
+    Arrays
+</h2>
+<!-- iteration  -->
+<ul>
+    <li *ngFor="let skill of skills">
+        <span>{{skill}}</span>
+    </li>
+</ul>
+
+
+import { Component, OnInit } from '@angular/core';
+import { Address } from '../types/address.type';
+
+@Component({
+  selector: 'app-interpolation',
+  templateUrl: './interpolation.component.html',
+  styles: [
+  ]
+})
+export class InterpolationComponent implements OnInit {
+
+  //state /models/data
+  firstName: string = "Subramanian"
+  lastName: string = "Murugan";
+  salary: number = 1000;
+  status: boolean = true
+
+  //object
+  address: Address = {
+    city: 'Coimbatore'
+  }
+  //arrays
+  skills: Array<string> = ["Java", "Angular", "Cloud", "Devops"]
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+..........................................................................................
+			[] -  symbol used for property,attribute,style,class binding
+...........................................................................................
+
+What is   attribute and property? - []
+
+<img src="imagelocation"/>
+      |
+attribute
+
+Why [] ?
+
+  To bind value dynamically.
+  
+<img src="logo.png"/> -static image
+
+<img [src]="variable"> - dynamic image
+
+<div hidden> --- static value to hide div element
+
+<div [hidden]="booleanvariable"> --- static value to hide div element
+
+<button enabled>
+
+<button [enabled="booleanvariable"> - dynamic value
+
+if you use "[]"  on html elements which is called "attribute binding"
+............................................................................................
+if you use [] on class or style attribute
+
+ <div class="tab"> - static css binding
+
+ </div>
+
+ <div [class]="cssClass"> - dynamic binding
+    -class binding
+
+ <div style="color:red"> - static css binding
+ <div [style]="conditionstyle"> dynamic css 
+    -style binding
+ 
+............................................................................................
+
+can i use [] on custom elements
+
+yes
+<app-header [title]="value/variable"> - passing title dynamically
+<app-product [products]="products">
+
+if you use "[]"  on custom elements which is called "property binding"
+............................................................................................
+
+Angular Dev tool:https://angular.io/guide/devtools
+..................
+-dynamic interaction
+-to know the tree model of compoent.
+
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-attributebinding',
+  templateUrl: './attributebinding.component.html',
+  styles: [
+  ]
+})
+export class AttributebindingComponent implements OnInit {
+
+  imageLocation: string = "favicon.ico"
+  isEnabled:boolean = false;
+  hide:boolean =true;
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+
+attributebinding.component.html
+<img src="favicon.ico"/>
+<img [src]="imageLocation" />
+<button [disabled]="isEnabled">Download</button>
+<div [hidden]="hide">Show /hide</div>
+.............................................................................................
+			     Property binding
+...........................................................................................
+
+Passing data from parent component to child component.
+we can pass data upto n of childrens
+Which is called "uni directional data flow model"
+Components can be communicated via props binding.
+
+Two steps:
+
+How to pass data from the parent to child?
+
+1.From the parent component : passing data
+  
+  <app-greeter [message]="message">
+
+ message:string="hello"
+
+2. How to receive the data
+   
+   @Input() decorator
+   message:string=""
+................
+
+  import { Component, OnInit } from '@angular/core';
+  import { Address } from '../types/address.type';
+
+  @Component({
+    selector: 'app-parent',
+    templateUrl: './parent.component.html',
+    styles: [
+    ]
+  })
+  export class ParentComponent implements OnInit {
+    mymessage: string = "Hello! Property"
+    address:Address = {
+      city:'Coimbatore'
+    }
+    skills:Array<string> = ["java","javascript","Angular"]
+    // address!: Address
+    constructor() { }
+
+    ngOnInit(): void {
+    }
+
+  }
+
+parent.component.html
+<h2>This is parent</h2>
+<app-child [message]="mymessage" 
+[address]="address" [skills]="skills">
+
+</app-child>
+  
+............
+
+import { Component, Input, OnInit } from '@angular/core';
+import { Address } from '../types/address.type';
+
+@Component({
+  selector: 'app-child',
+  templateUrl: './child.component.html',
+  styles: [
+  ]
+})
+export class ChildComponent implements OnInit {
+
+  @Input()
+  message: string = "";
+
+  /**
+   * ts config 
+   * strict: true 
+   * means that variable must have been initalized
+   * but i dont want to make strict : false
+   * there is solution : definite assigment operator "!"
+   */
+  @Input()
+  address!: Address;
+
+  @Input('skills')
+  myskills!:Array<string>;
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+
+child.component.html
+
+<h2>Data from Parent</h2>
+<h3>String {{message}}</h3>
+<h3>Object {{address?.city ?? "Default city"}}</h3>
+<h3>Array</h3>
+<ul>
+    <li *ngFor="let skill of myskills">
+        <span>{{skill}}</span>
+    </li>
+</ul>
+
+App component:
+ <div>
+    <h1>Property Binding</h1>
+    <app-parent></app-parent>
+  </div>
+.............................................................................................
+					CSS - how to use css 
+
+Angular attaches css to component 
+
+1.global css
+ -styles.css
+ -bootstrap framework
+
+2.component sepcific css
+..............................................................................................
+				.......................................................................................
+					Event Binding
+.............................................................................................
+
+
+EventTarget Object: Event
+  It connects dom object and listner method.
+  where listener method can read values and other proproperties of dom object.
+
+btn.addEventListener = function(evt){
+  evt.target   
+
+}
+$event  - is global variable from the angular which has reference of EventTarget object
+
+
+Two way binding:
+
+-data is transfered from view to controller and controller to view 
+
+How to implement two way data binding
+
+1.events
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Simple events:
+<div>
+    <button class="btn btn-success" (click)="onClick()" >Click</button>
+    <!-- Pass data to listener -->
+    <hr>
+    <button class="btn btn-success" (click)="onReceive('hello how are you?')" >SendData</button>
+</div>
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-event',
+  templateUrl: './event.component.html',
+  styles: [
+  ]
+})
+export class EventComponent implements OnInit {
+
+
+  //listener function
+  onClick() {
+    alert('hello')
+  }
+  onReceive(message:string) {
+    alert(message)
+  }
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+..........................................................................................
+			How to read input from the keyboards
+                           (Two way data binding)						
+............................................................................................
+
+
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { EventComponent } from './event.component';
+import { InputComponent } from './input.component';
+import { FormsModule } from '@angular/forms';
+
+
+
+@NgModule({
+  declarations: [
+    EventComponent,
+    InputComponent
+  ],
+  imports: [
+    CommonModule,FormsModule
+  ],
+  exports: [
+    EventComponent,
+    InputComponent
+  ]
+})
+export class EventbindingModule { }
+
+
+
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-input',
+  templateUrl: './input.component.html',
+  styles: [
+  ]
+})
+export class InputComponent implements OnInit {
+
+  text:string = ""
+  messageOne:string = ""
+  messageTwo:string ="defaultvalue"
+  messageThree:string = ""
+  readInput(ctrl: any) {
+    this.text = ctrl.target.value 
+  }
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+
+input.component.html
+
+<div>
+    <h2>Input Event</h2>
+    <div>
+        <h3>With Listener</h3>
+        <h3>{{text}}</h3>
+        <input (input)="readInput($event)">
+    </div>
+
+    <div>
+        <h3>Without Listener</h3>
+        <h3>{{messageOne}}</h3>
+        <input (input)="messageOne=$event.target.value">
+    </div>
+    <div>
+        <h3>Property Binding + Event Binding </h3>
+        <h3>{{messageTwo}}</h3>
+        <input  [value]="messageTwo" (input)="messageTwo=$event.target.value">
+    </div>
+    <div>
+        <h3>Property Binding + Event Binding = Banana Box Notation [()] </h3>
+        <h3>{{messageThree}}</h3>
+        <input [(ngModel)]="messageThree">
+    </div>
+</div>
+.............................................................................................
+				Custom Events -Component Communication
+..............................................................................................
+
+Types of events:
+
+1.dom events - click,input,keypress.......
+2.custom events - events for custom elements
+
+Why custom events?
+
+Component communcation:
+
+1.parent to child - via props pattern
+2.child to parent - via custom events
+3.across components -  via services
+
+2.child to parent - via custom events
+
+
+Steps : write two components
+
+1.parent
+2.child
+
+2.child to parent - via custom events
+
+
+
+Steps : write two components
+
+1.parent
+2.child
+
+
+Parent
+
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-parent',
+  templateUrl: './parent.component.html',
+  styles: [
+  ]
+})
+export class ParentComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+
+2.Child Component
+
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-child',
+  templateUrl: './child.component.html',
+  styles: [
+  ]
+})
+export class ChildComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+
+Step 2:
+
+ EventEmitter:
+
+Use in components with the @Output directive to emit custom events synchronously or asynchronously, and register handlers for those events by subscribing to an instance.
+
+1.EventEmitter is used to broad cast values to Parent Components
+
+class EventEmitter<T> extends Subject {
+  constructor(isAsync?: boolean): EventEmitter<T>
+  emit(value?: T): void
+  subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Subscription
+}
+
+2.EventEmitter object is Subclass Rxjs Subject.
+
+create EventEmitter Object of type in child compoent.
+
+eventemitter is used to send custom events.
+
+   onSendRequest = new EventEmitter<string>();
+
+3.We have to decorate eventemitter with @Output()
+
+  @Output()
+  onSendRequest = new EventEmitter<string>();
+
+4.send data to Parent Component
+
+    <div>
+        <input [(ngModel)]="message">
+    </div>
+    <div>
+        <button (click)="onSend()">Send To Parent</button>
+    </div>
+
+export class ChildComponent {
+
+  message: string = "Good Value"
+  //event emitter Declaration
+  @Output()
+  onSendRequest = new EventEmitter<string>();
+  onSend() {
+    alert('sending data to parent')
+    //emit data  -  next method in subject
+    this.onSendRequest.emit(this.message)
+  }
+
+}
+
+5.Listens event and grab the data from the Child
+
+<div>
+    <h1 style="text-align: center;">Parent Component</h1>
+    <h2>{{childMessage}}</h2>
+</div>
+<hr/>
+<app-child (onSendRequest)="onReadData($event)" ></app-child>
+
+
+export class ParentComponent {
+
+  childMessage: string;
+
+  onReadData(event: any) {
+    this.childMessage = event
+  }
+
+}
+
+/////////////
+
+final code :
+
+Child:
+<div>
+    <h1 style="text-align: center;">Child Component</h1>
+    <div>
+        <input [(ngModel)]="message">
+    </div>
+    <div>
+        <button (click)="onSend()">Send To Parent</button>
+    </div>
+</div>
+
+
+export class ChildComponent implements OnInit {
+
+  message: string = "Good Value"
+  //event emitter Declaration
+  @Output()
+  onSendRequest = new EventEmitter<string>();
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+  onSend() {
+    alert('sending data to parent')
+    //emit data  -  next method in subject
+    this.onSendRequest.emit(this.message)
+  }
+
+}
+
+
+Parent:
+
+<div>
+    <h1 style="text-align: center;">Parent Component</h1>
+    <h2>{{childMessage}}</h2>
+</div>
+<hr/>
+<app-child (onSendRequest)="onReadData($event)" ></app-child>
+
+export class ParentComponent {
+
+  childMessage: string;
+  onReadData(event: any) {
+    this.childMessage = event
+  }
+
+}
+..............................................................................................
+				  Dynamic Css  - How to change Style dynamically
+.............................................................................................
+class binding and style binding
+...............................
+
+class binding:
+
+<div [class.special]="isSpecial" [class]="classExpression">Some text.</div>
+
+style binding:
+
+<nav [style.background-color]="expression"></nav>
+<nav [style.backgroundColor]="expression"></nav>
+
+
+
+<div (click)="changeStyle()" [class.special]="isSpecial">Some text.</div>
+<a [style.text-decoration]="activeLinkStyle">Home Page</a>
+
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-dynamiccss',
+  templateUrl: './dynamiccss.component.html',
+  styles: [
+  ]
+})
+export class DynamiccssComponent implements OnInit {
+  isSpecial: boolean = true
+  activeLinkStyle = 'overline';
+  constructor() { }
+
+  changeStyle() {
+    this.isSpecial = !this.isSpecial
+  }
+
+  ngOnInit(): void {
+  }
+
+}
+
+styles.css
+.special {
+   font-size: large;
+   font-weight: 400;
+   color:brown;
+}
+..............................................................................................
+
+
+
+
+
 
 
 
