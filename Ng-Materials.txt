@@ -1448,6 +1448,19 @@ Built in structural directives
 2.*ngIf  : if condition
 3.*ngSwitch : switch
 
+..............................................................................................						    CommonModule
+
+Where are structural directives?
+
+ngFor itself is object part of commonmodule.
+
+incase if you are using structural directives inside submodule, commonModule must have been injected.
+
+if any component part of main module, we dont need to inject commonModule becuase BrowserModule which contains all structural directives.
+
+
+
+
 
 List /Array rendering:
 ......................
@@ -1509,6 +1522,648 @@ Static view:
 </div>
 
 ////////////////////////////////////////////////////////////////////////////////////////////
+
+eg:
+<div>
+    <ul>
+        <li *ngFor="let course of courses">
+            {{course}}
+        </li>
+    </ul>
+</div>
+<h2>Users data</h2>
+<div>
+    <div *ngFor="let user of users">
+        <h3>{{user.username}}</h3>
+        <p>{{user.email}}</p>
+        <address>
+            <p>{{user.address.street}},{{user.address.city}}</p>
+        </address>
+    </div>
+</div>
+
+import { Component, OnInit } from '@angular/core';
+import { USERS } from '../mock-data/users';
+
+@Component({
+  selector: 'app-forloop',
+  templateUrl: './forloop.component.html',
+  styles: [
+  ]
+})
+export class ForloopComponent implements OnInit {
+
+  courses: Array<string> = ["javascript", "angular", "Microservices"]
+
+  users: Array<any> = USERS;
+
+
+
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+.............................................................................................
+				if..else,ngtemplate,#
+............................................................................................
+
+import { Component, OnInit } from '@angular/core';
+import { USERS } from '../mock-data/users';
+
+@Component({
+  selector: 'app-ifelse',
+  templateUrl: './ifelse.component.html',
+  styles: [
+  ]
+})
+export class IfelseComponent implements OnInit {
+
+  isEnabled: boolean = true
+  users!: Array<any>;
+  loading: boolean = true;
+  status: string = "loading....."
+  isHidden: boolean = false;
+
+  constructor() {
+    setTimeout(() => {
+      this.users = USERS;
+      this.loading = !this.loading;
+    }, 5000);
+  }
+
+  toggle() {
+    this.isHidden = !this.isHidden;
+  }
+  ngOnInit(): void {
+  }
+
+}
+<div *ngIf="isEnabled; else mycondition">
+    <h1>You have Facility!</h1>
+</div>
+
+<ng-template #mycondition>
+    <h1>Sorry! Facility is not available</h1>
+</ng-template>
+
+<h2>Progress bar</h2>
+<div *ngIf="loading; else notLoading  ">
+    <h2>{{status}}</h2>
+</div>
+<ng-template #notLoading>
+    <div *ngFor="let user of users">
+        <h3>{{user.username}}</h3>
+        <p>{{user.email}}</p>
+        <address>
+            <p>{{user.address.street}},{{user.address.city}}</p>
+        </address>
+    </div>
+</ng-template>
+<h2>Ng vs Hidden attribute</h2>
+<button class="btn btn-success" (click)="toggle()">Toggle</button>
+<!--Show and Hide-->
+<!-- <div *ngIf="isHidden">
+    <h1>Hello</h1>
+</div> -->
+<div [hidden]="isHidden">
+    <h1>Hai</h1>
+</div>
+..............................................................................................
+					Switch case
+..............................................................................................
+
+<h1 style="text-align: center;">Swich case </h1>
+<input [(ngModel)]="input">
+<button (click)="showFeedback()">Show Feedback</button>
+
+<div [ngSwitch]="feedback">
+    <p *ngSwitchCase="'good'">Good</p>
+    <p *ngSwitchCase="'verygood'">Very Good</p>
+    <p *ngSwitchCase="'bad'">Bad</p>
+    <p *ngSwitchDefault>Your input is not matching</p>
+</div>
+
+<div [ngSwitch]="feedback">
+    <ng-template [ngSwitchCase]="'good'">
+        <h3>Good</h3>
+    </ng-template>
+    <ng-template [ngSwitchCase]="'verygood'">
+        <h3>Very Good</h3>
+    </ng-template>
+    <ng-template [ngSwitchCase]="'bad'">
+        <h3>bad</h3>
+    </ng-template>
+    <ng-template ngSwitchDefault>
+        <h3>Your input is not matching</h3>
+    </ng-template>
+</div>
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-switchcase',
+  templateUrl: './switchcase.component.html',
+  styles: [
+  ]
+})
+export class SwitchcaseComponent implements OnInit {
+
+  input: string = ""
+  feedback: string = "good"
+  constructor() { }
+  showFeedback() {
+    this.feedback = this.input
+  }
+
+  ngOnInit(): void {
+  }
+
+}
+..............................................................................................
+				   Attribute Directives
+.............................................................................................
+
+How to add new extra attributes on html elements
+
+<div myattribute=somevalue>
+
+ Adding extra behaviour to existing dom elements.
+
+eg:
+ <div subu="">
+
+ <div appHighlight>
+
+How to create our own attribute directive.
+
+import { Directive, ElementRef, HostListener } from '@angular/core';
+
+@Directive({
+  selector: '[appHighlight]'
+})
+export class HighlightDirective {
+
+  constructor(private element:ElementRef) { 
+    //  console.dir(this.element.nativeElement)
+    this.element.nativeElement.style.backgroundColor = 'yellow'
+  }
+  @HostListener('mouseenter')
+  onMouseEnter() {
+    this.highLight('blue')
+  }
+  @HostListener('mouseleave')
+  onMouseLeave() {
+    this.highLight(null)
+  }
+  private highLight(color: any) {
+    this.element.nativeElement.style.backgroundColor = color
+  }
+}
+<div>
+    <h1 appHighlight>IBM</h1>
+
+    <p appHighlight>IBM</p>
+
+</div>
+.............................................................................................
+				    Services
+			    Async Programming - promises,Rxjs
+.............................................................................................
+..............................................................................................
+				  Services
+.............................................................................................
+Service is object going to hold biz logic and data.
+
+In Mvc , service is acting as bridge between UI and back end
+
+
+ View --------------Controller---------Service-----backend
+
+ View-----------------Component---------Service-----Backend.
+
+
+Types of services 
+
+1.global/shared  services:
+  Services are used by many components.
+eg: Logger,Utility
+2.Domain specfic services
+  users
+    usercomponent
+    usersservice
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+Declare Service,Create Service Object,grab service OBject(di)
+
+import { Injectable } from "@angular/core";
+
+
+//@Injectable tells to create object
+
+@Injectable()
+export class GreeterService {
+    constructor() {
+
+    }
+    public sayHello(): string {
+        return `Hello`;
+    }
+}
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { GreeterComponent } from './greeter.component';
+import { GreeterService } from './greeter.service';
+
+
+
+@NgModule({
+  declarations: [
+    GreeterComponent
+  ],
+  imports: [
+    CommonModule
+  ],
+  exports: [
+    GreeterComponent
+  ],
+  providers: [GreeterService]
+})
+export class GreeterModule { }
+
+import { Component, OnInit } from '@angular/core';
+import { GreeterService } from './greeter.service';
+
+@Component({
+  selector: 'app-greeter',
+  templateUrl: './greeter.component.html',
+  styles: [
+  ]
+})
+export class GreeterComponent implements OnInit {
+
+  message!: string;
+
+  constructor(private greeterService:GreeterService) {
+    this.message = this.greeterService.sayHello();
+  }
+
+  ngOnInit(): void {
+  }
+
+}
+..........................................................................................
+			Injector information inline rather than using providers
+..............................................................................................
+
+import { Injectable } from "@angular/core";
+
+/**
+ * To create service object we have different types of injector
+ * -Component Injector
+ * -Module Injector 
+ * -Global Injector  - Recommended to create instance one time(singleton),reuse any where in the applicatoin
+ */
+
+//@Injectable tells to create object
+
+@Injectable({
+    providedIn: 'root'
+})
+export class GreeterService {
+    constructor() { }
+    
+    public sayHello(): string {
+        return `Hello`;
+    }
+}
+...............................................................................................
+					Data initalization inside compoent
+..............................................................................................
+
+
+way to initalize the data:
+
+1.inside constructor.
+
+ message!: string;
+
+  constructor(private greeterService:GreeterService) {
+    this.message = this.greeterService.sayHello();
+  }
+
+but it is not recommended. constructors only used for di not for data initalization.
+
+Component Life cycle apis
+...........................
+
+Component Life Cycle Methods: hooks:
+   methods are called by angular runtime when component/directive goes in transistion.
+
+init and destory hook:
+......................
+
+init - called after constructor completes, where you can write resource insentive tasks
+  like api calls,timers,websocket integration.
+
+destory -called once if the component is removed from memory or from component tree
+   -cleanup activities.
+
+init and destroy is represented inside life cyle hooks interfaces
+
+OnInit interface
+ ngOnInit(): void {
+    throw new Error('Method not implemented.');
+  }
+init and destroy is represented inside life cyle hooks interfaces
+
+OnInit interface
+ ngOnInit(): void {
+    throw new Error('Method not implemented.');
+  }
+
+
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { GreeterService } from './greeter.service';
+
+@Component({
+  selector: 'app-greeter',
+  templateUrl: './greeter.component.html',
+  styles: [
+  ],
+  // providers:[GreeterService]
+})
+export class GreeterComponent { // implements OnInit, OnDestroy {
+
+  message!: string;
+
+  constructor(private greeterService: GreeterService) {
+    // this.message = this.greeterService.sayHello();
+  }
+
+  ngOnInit(): void {
+    //initalization code
+    this.message = this.greeterService.sayHello();
+  }
+  ngOnDestroy() {
+    //cleanup code will go here
+  }
+
+}
+.............................................................................................
+			 Services can have its own dependencies
+.............................................................................................
+
+import { Injectable } from "@angular/core";
+import { MessageService } from "../utils/message.service";
+
+/**
+ * To create service object we have different types of injector
+ * -Component Injector
+ * -Module Injector 
+ * -Global Injector  - Recommended to create instance one time(singleton),reuse any where in the applicatoin
+ */
+
+//@Injectable tells to create object
+
+@Injectable({
+    providedIn: 'root'
+})
+export class GreeterService {
+    constructor(private messageService: MessageService) { }
+
+    public sayHello(): string {
+        this.messageService.add('SayHello method  is called')
+        return `Hello`;
+    }
+    public sayHai(): string {
+        this.messageService.add('SayHai method is called')
+        return `Hai`;
+    }
+}
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MessageService } from '../utils/message.service';
+import { GreeterService } from './greeter.service';
+
+@Component({
+  selector: 'app-greeter',
+  templateUrl: './greeter.component.html',
+  styles: [
+  ],
+  // providers:[GreeterService]
+})
+export class GreeterComponent { // implements OnInit, OnDestroy {
+
+  message!: string;
+  messages: Array<string> = [];
+
+  constructor(private greeterService: GreeterService, private messageService: MessageService) {
+    // this.message = this.greeterService.sayHello();
+  }
+
+  ngOnInit(): void {
+    //initalization code
+    this.message = `${this.greeterService.sayHello()} ${this.greeterService.sayHai()}` ;
+    this.messages = this.messageService.fetch();
+  }
+  ngOnDestroy() {
+    //cleanup code will go here
+  }
+
+}
+<div>
+    <h2>{{message}}</h2>
+    <div *ngFor='let message of messages'> {{message}} </div>
+
+</div>
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class MessageService {
+  private messages: string[] = [];
+
+  add(message: string) {
+    this.messages.push(message);
+  }
+  fetch(): string[] {
+    return this.messages;
+  }
+
+  clear() {
+    this.messages = [];
+  }
+}
+.............................................................................................
+				 Services with biz logic
+.............................................................................................
+
+import { Component, OnInit } from '@angular/core';
+import { MessageService } from '../utils/message.service';
+import { CalculatorService } from './calculator.service';
+
+@Component({
+  selector: 'app-calculator',
+  templateUrl: './calculator.component.html',
+  styles: [
+  ]
+})
+export class CalculatorComponent implements OnInit {
+
+  result: number = 0;
+
+  constructor(private calcService: CalculatorService, public messageService: MessageService) {
+  }
+  public add() {
+    this.result = this.calcService.add(10, 10);
+  }
+  public multiply() {
+    this.result = this.calcService.multiply(10, 10);
+  }
+  ngOnInit(): void {
+  }
+
+}
+............................................................................................
+<div>
+    <h1>Result {{result}}</h1>
+    <button (click)="add()">Add</button>
+    <button (click)="multiply()">Multiply</button>
+
+    <div *ngFor='let message of messageService.fetch()'> {{message}} </div>
+</div>
+.............................................................................................
+import { Injectable } from '@angular/core';
+import { MessageService } from '../utils/message.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CalculatorService {
+  constructor(private messageService: MessageService) { }
+
+  //biz method
+  public add(a: number, b: number): number {
+    this.messageService.add('add method  is called')
+    return a + b;
+  }
+  public substrac(a: number, b: number): number {
+    this.messageService.add('substract method  is called')
+    return a - b;
+  }
+  public multiply(a: number, b: number): number {
+    this.messageService.add('multiply method  is called')
+
+    return a * b;
+  }
+  public div(a: number, b: number): number {
+    this.messageService.add('div method  is called')
+    return a / b;
+  }
+}
+..............................................................................................
+				 Types of services
+
+1.Sync services
+  blocking services which blocks the current thread, so that ui will be freezed until the data
+or result is available.
+ 
+2.Async services
+  Non blocking
+  the task which wont block the current thread.
+  The computation will be done in other threads, once the task is over the result will be handed over to main thread.
+
+How to implement async programming in js(angular)?
+
+1.callback pattern - core pattern
+2.Promise pattern - wrapper for callbacks
+3.Reactive programming-rxjs
+
+
+1.callback pattern - core pattern
+async apis
+-timer
+-ajax
+-websocket
+
+import { Injectable } from '@angular/core';
+import { USERS } from '../mock-data/users';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+
+  constructor() { }
+  //sync service
+  // fetchUser() {
+  //   return USERS
+  // }
+  //async service with callback
+  fetch(callback: Function) {
+    setTimeout(callback, 5000, USERS);
+  }
+
+}
+..............................................................................................
+				    Promises - Simplifying the callbacks
+.............................................................................................
+
+import { Component, OnInit } from '@angular/core';
+import { User } from '../types/user.type';
+import { UserService } from './user.service';
+
+@Component({
+  selector: 'app-user',
+  templateUrl: './user.component.html',
+  styles: [
+  ]
+})
+export class UserComponent implements OnInit {
+
+  users!: Array<User>;
+  loading: boolean = true;
+  status: string = "loading....."
+
+  constructor(private userService: UserService) { }
+
+  ngOnInit(): void {
+    this.userService.fetch().then(users => {
+      this.loading = !this.loading;
+      this.users = users;
+    });
+  }
+
+}
+import { Injectable } from '@angular/core';
+import { USERS } from '../mock-data/users';
+import { User } from '../types/user.type';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+
+  constructor() { }
+  //async service with promises
+  fetch(): Promise<User[]> {
+    return new Promise((resolve, reject) => {
+      //async logic
+      setTimeout(resolve, 5000, USERS);
+    });
+  }
+
+}
+............................................................................................					Reactive Programming- Rxjs
+...........................................................................................
+
+
+
+
 
 
 
