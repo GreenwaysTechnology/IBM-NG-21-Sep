@@ -1,0 +1,7 @@
+<div>
+    <h1>Result {{result}}</h1>
+    <button (click)="add()">Add</button>
+    <button (click)="multiply()">Multiply</button>
+
+    <div *ngFor='let message of messageService.fetch()'> {{message}} </div>
+</div>

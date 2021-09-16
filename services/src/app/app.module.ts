@@ -2,8 +2,9 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import { StructuraldirectivesModule } from './structuraldirectives/structuraldirectives.module';
-import { AttributedirectivesModule } from './attributedirectives/attributedirectives.module';
+import { GreeterModule } from './greeter/greeter.module';
+import { CalculatorModule } from './calculator/calculator.module';
+import { UsersModule } from './users/users.module';
 
 @NgModule({
   declarations: [
@@ -11,8 +12,9 @@ import { AttributedirectivesModule } from './attributedirectives/attributedirect
   ],
   imports: [
     BrowserModule,
-    StructuraldirectivesModule,
-    AttributedirectivesModule
+    GreeterModule,
+    CalculatorModule,
+    UsersModule
   ],
   providers: [],
   bootstrap: [AppComponent]
