@@ -2161,6 +2161,439 @@ export class UserService {
 ............................................................................................					Reactive Programming- Rxjs
 ...........................................................................................
 
+What is reactive programming?
+
+Reactive Programming is programming model with data streams.
+An API for asynchronous programming with observable streams
+
+Why Reactive programming?
+
+You are transfering data from one place to another in network.
+with in system (microservices) or across system (outside) like ui,mobile
+
+sync or async you can transfer data.
+
+streaming is nothing data transfer does not happen in one go rather which will move chunk by chunk.
+
+Process the stream by appling functions.
+
+Reactive programming = Data Streaming in async way.
+
+Rx programming is based three design pattern
+
+1.Observer
+2.Functional Programming
+3.Iterator
+.............................................................................................
+		 Reactive programming is language/framework/lib independant 
+...........................................................................................
+Java script + Reactive Programming = rxjs
+
+What is rxjs?
+
+rxjs is javascript lib for writing reactive programming in js echo system.
+
+rxjs and angular:
+
+angular uses rxjs for data streaming and processing in async way.
+
+..............................................................................................
+				 rxjs core concepts
+
+reactive programming is purly based on "event driven arch".
+publisher emits events , subscribers listen for event.
+
+
+push based programming model where publisher push 
+ data,error,complete
+
+Observer design pattern implementation
+
+-Publisher
+   who push the data.
+
+Angular : publisher is service
+
+-Subscriber
+   listen for the data
+
+
+Angular : subscribers are components
+..............................................................................................
+
+RXJS Core objects:
+
+Publisher:
+ Observable
+ Subjects
+
+Subscriber
+ Subscription
+ Subscriber
+
+Operators
+ functions used for data processing.
+
+Scheduler
+  For concurrency data processing
+.............................................................................................
+				 Rxjs and angular
+
+Angular has integreted rxjs built in, so we dont need to install separatly.
+
+Angular apis uses rxjs:
+
+1.HTTPClient
+2.Routers
+3.Forms
+4.EventEmitter
+etc...
+
+
+steps:
+
+1.create stream object- observable
+2.push data /stream data
+3.subscribe data/listening for data.
+
+.............................................................................................
+
+import { Injectable } from '@angular/core';
+import { of, Observable, range } from 'rxjs';
+import { delay, filter, map, takeLast } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class NumberStreamService {
+
+  constructor() { }
+  //streamming
+  // public getValue(): Observable<number> {
+  //   return new Observable(subscriber => {
+  //     //push data into stream
+  //     subscriber.next(1);
+  //     subscriber.next(2);
+  //     subscriber.next(3);
+  //     setTimeout(() => {
+  //       subscriber.next(4);
+  //       subscriber.complete();
+  //     }, 1000);
+  //   });
+
+  // }
+  //creational operator : of
+  public getValue(): Observable<number> {
+    return of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+  }
+
+  //process the data : transformation and filter
+
+  //double it:
+
+  public doubleIt(): Observable<number> {
+    return of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+      .pipe(
+        map(i => i * 2),
+        map(j => j)
+      );
+  }
+
+  // public findEvenNumbers(): Observable<number> {
+  //   return of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+  //     .pipe(
+  //       filter(i => i % 2 === 0)
+  //     );
+  // }
+
+  //find even numbers for from to 100
+  // public findEvenNumbers(): Observable<number> {
+  //   return range(1,100)
+  //     .pipe(
+  //       filter(i => i % 2 === 0)
+  //     );
+  // }
+  //find even numbers from 1 to 100 , but i need last 10 values only
+  public findEvenNumbers(): Observable<number> {
+    return range(1,100)
+      .pipe(
+        filter(i => i % 2 === 0),
+        delay(5000),
+        takeLast(10)
+      );
+  }
+
+
+}
+import { Component, OnInit } from '@angular/core';
+import { NumberStreamService } from './numberstream.service';
+
+@Component({
+  selector: 'app-numberreactive',
+  templateUrl: './numberreactive.component.html',
+  styles: [
+  ]
+})
+export class NumberreactiveComponent implements OnInit {
+
+  stream$: Array<number> = [];
+  constructor(private numService: NumberStreamService) { }
+
+  ngOnInit(): void {
+    //listener/subscriber
+    //simpleStream();
+    //this.doubleIt();
+    this.findEvenNumbers();
+  }
+  private simpleStream() {
+    this.numService.getValue().subscribe(num => {
+      console.log(`stream data  : ${num}`)
+      this.stream$.push(num);
+    }, err => {
+      console.log(err)
+    }, () => {
+      console.log('done');
+    });
+  }
+  private doubleIt() {
+    this.numService.doubleIt().subscribe(num => {
+      this.stream$.push(num);
+    }, err => {
+      console.log(err)
+    }, () => {
+      console.log('done');
+    });
+  }
+
+  private findEvenNumbers(){
+    this.numService.findEvenNumbers().subscribe(num => {
+      this.stream$.push(num);
+    }, err => {
+      console.log(err)
+    }, () => {
+      console.log('done');
+    });
+  }
+
+}
+.
+<h1>Streaming</h1>
+<ul>
+    <li *ngFor="let data of stream$">
+        <span>{{data}}</span>
+    </li>
+</ul>
+.............................................................................................
+				 How to stream array
+.............................................................................................
+	
+import { Injectable } from '@angular/core';
+import { from, Observable, of } from 'rxjs';
+import { USERS } from '../mock-data/users';
+import { User } from '../types/user.type';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ArraystreamService {
+
+  constructor() { }
+  // public findAll(): Observable<User> {
+  //   return from(USERS);
+  // }
+  public findAll(): Observable<User[]> {
+    return of(USERS);
+  }
+}
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { User } from '../types/user.type';
+import { ArraystreamService } from './arraystream.service';
+
+@Component({
+  selector: 'app-arrayreactive',
+  templateUrl: './arrayreactive.component.html',
+  styles: [
+  ]
+})
+export class ArrayreactiveComponent implements OnInit {
+
+  // stream$!: User[];
+//  users!: Observable<User[]>;
+  constructor(public arrayService: ArraystreamService) { }
+
+  ngOnInit(): void {
+    // this.arrayService.findAll().subscribe(data => {
+    //   console.log(data);
+    //   this.stream$ = data;
+    // });
+   // this.users = this.arrayService.findAll();
+  }
+
+}
+<div>
+    <ul>
+        <!-- <li *ngFor="let user of stream$">
+            <!-- <span>{{user.id}} {{user.name}}</span> -->
+            <!-- <span>{{user | json}}</span> -->
+        <!-- </li> -->
+         
+        <!-- <li *ngFor="let user of users | async">
+            <span>{{user | json}}</span>
+        </li> -->
+          <li *ngFor="let user of arrayService.findAll() | async">
+            <span>{{user | json}}</span>
+        </li>
+    </ul>
+</div>
+.............................................................................................
+			   Error Handling
+............................................................................................
+
+
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ErrorhandlingService {
+
+  constructor() { }
+
+  //handling error inside subscribe method
+  // public handleError(): Observable<number> {
+  //   return of(1, 2, 3, 4, 5).pipe(
+  //     map(n => {
+  //       if (n === 4) {
+  //         throw 'four!';
+  //       }
+  //       return n;
+  //     }),
+  //   )
+
+  // }
+
+  //implementing fallback
+  //catchError will convert error into success response
+  public handleError(): Observable<number> {
+    return of(1, 2, 3, 4, 5).pipe(
+      map(n => {
+        if (n === 4) {
+          throw 'four!';
+        }
+        return n;
+      }),
+      catchError(err => {
+        return of(this.fallback());
+      })
+    )
+  }
+  private fallback() {
+    return 900;
+  }
+
+
+}
+...
+
+import { Component, OnInit } from '@angular/core';
+import { ErrorhandlingService } from './errorhandling.service';
+
+@Component({
+  selector: 'app-errorhandling',
+  templateUrl: './errorhandling.component.html',
+  styles: [
+  ]
+})
+export class ErrorhandlingComponent implements OnInit {
+
+  constructor(private errorHandlingSerivce: ErrorhandlingService) { }
+
+  ngOnInit(): void {
+    // this.errorHandlingSerivce.handleError().subscribe(data => {
+    //   console.log(data);
+    // }, err => {
+    //   console.log(err);
+    // });
+    //without error handler: using catchError
+
+    this.errorHandlingSerivce.handleError().subscribe(data => {
+      console.log('data block ', data);
+    }, err => {
+      console.log('error block',err);
+    });
+  }
+
+
+}
+..............................................................................................
+				 Resilience Operators
+
+
+1.fail fast
+	if api hits error , immediatly you throw an error, catch it or fallback it.
+2.retry
+  if api hits error , dont throw an error immediately,rather give some time recovery.
+
+
+
+import { Injectable } from '@angular/core';
+import { Observable, of, timer } from 'rxjs';
+import { map, catchError, retry, retryWhen, tap, delayWhen } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ErrorhandlingService {
+
+  constructor() { }
+
+  //handling error inside subscribe method
+  // public handleError(): Observable<number> {
+  //   return of(1, 2, 3, 4, 5).pipe(
+  //     map(n => {
+  //       if (n === 4) {
+  //         throw 'four!';
+  //       }
+  //       return n;
+  //     }),
+  //   )
+
+  // }
+
+  //implementing fallback
+  //catchError will convert error into success response
+  public handleError(): Observable<number> {
+    return of(1, 2, 3, 4, 5).pipe(
+      map(n => {
+        console.log('hitting', n);
+        if (n === 4) {
+          throw 'four!';
+        }
+        return n;
+      }),
+      retry(3),
+      //       retryWhen(errors =>
+      //         errors.pipe(
+      //           // log error message
+      //           tap(val => console.log(`Value ${val} was too high!`)),
+      //           // restart in 5 seconds
+      // //delayWhen(val => timer(val * 1000))
+      //         )
+      //       ),
+      catchError(err => {
+        return of(this.fallback());
+      })
+    )
+  }
+  private fallback() {
+    return 900;
+  }
+
+
+}
 
 
 

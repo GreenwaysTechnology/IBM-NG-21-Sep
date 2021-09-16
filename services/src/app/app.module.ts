@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { GreeterModule } from './greeter/greeter.module';
 import { CalculatorModule } from './calculator/calculator.module';
 import { UsersModule } from './users/users.module';
+import { ReactiveModule } from './reactive/reactive.module';
 
 @NgModule({
   declarations: [
@@ -14,7 +15,8 @@ import { UsersModule } from './users/users.module';
     BrowserModule,
     GreeterModule,
     CalculatorModule,
-    UsersModule
+    UsersModule,
+    ReactiveModule
   ],
   providers: [],
   bootstrap: [AppComponent]

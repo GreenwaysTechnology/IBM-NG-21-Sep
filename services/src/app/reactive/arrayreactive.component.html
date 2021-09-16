@@ -1,0 +1,15 @@
+<div>
+    <ul>
+        <!-- <li *ngFor="let user of stream$">
+            <!-- <span>{{user.id}} {{user.name}}</span> -->
+            <!-- <span>{{user | json}}</span> -->
+        <!-- </li> -->
+         
+        <!-- <li *ngFor="let user of users | async">
+            <span>{{user | json}}</span>
+        </li> -->
+          <li *ngFor="let user of arrayService.findAll() | async">
+            <span>{{user | json}}</span>
+        </li>
+    </ul>
+</div>
