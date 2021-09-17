@@ -6,6 +6,7 @@ import { GreeterModule } from './greeter/greeter.module';
 import { CalculatorModule } from './calculator/calculator.module';
 import { UsersModule } from './users/users.module';
 import { ReactiveModule } from './reactive/reactive.module';
+import { BroadcastingModule } from './broadcasting/broadcasting.module';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { ReactiveModule } from './reactive/reactive.module';
     GreeterModule,
     CalculatorModule,
     UsersModule,
-    ReactiveModule
+    ReactiveModule,
+    BroadcastingModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -2592,11 +2592,1252 @@ export class ErrorhandlingService {
     return 900;
   }
 
+}
+.............................................................................................
+					Communicaitons
+
+Types of communication:
+1.unicast 
+   one to one 
+  one publisher and one subscriber
+
+2.multi cast
+
+  one publisher , many subscribers
+..............................................................................................						Multi cast
+..............................................................................................
+
+There are two ways to broadcast values 
+
+1.cold stream
+2.hot stream
+
+
+1.cold stream
+
+1.Observable that doesn’t emit items until a subscriber subscribes.
+
+2.If we have more than one subscriber, then observable will 
+emit sequence of items to all subscribers one by one.
+
+3.Each subscriber get "fresh copy of the data from the begining".
+
+4.Most of Observerables are Cold.
+..............................................................................................
+eg:
+import { Injectable } from '@angular/core';
+import { interval, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ColdstreamService {
+
+  constructor() { }
+
+  //cold stream api
+  public emitValue(): Observable<number> {
+    return interval(1000).pipe(tap(() => console.log('emitting')));
+  }
+}
+
+<h1>Subscriber-1</h1>
+<ul>
+    <li *ngFor="let i of values">
+        {{i}}
+    </li>
+</ul>
+
+import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { ColdstreamService } from './coldstream.service';
+
+@Component({
+  selector: 'app-cstreamsub1',
+  templateUrl: './cstreamsub1.component.html',
+  styles: [
+  ]
+})
+export class Cstreamsub1Component implements OnInit {
+
+  values: number[] = [];
+  subscription!: Subscription;
+
+  constructor(public coldService: ColdstreamService) { }
+
+  ngOnInit(): void {
+    this.subscription = this.coldService.emitValue().subscribe(data => {
+      // console.log(data)
+      this.values.push(data);
+    })
+    setTimeout(() => {
+      this.subscription.unsubscribe();
+      console.log('unsubscribe')
+    }, 5000)
+  }
+  ngOnDestory() {
+    console.log('component has been destroyed')
+    this.subscription.unsubscribe()
+  }
+}
+
+<h1>Subscriber-2</h1>
+<ul>
+    <li *ngFor="let i of values">
+        {{i}}
+    </li>
+</ul>
+import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { ColdstreamService } from './coldstream.service';
+
+@Component({
+  selector: 'app-cstreamsub2',
+  templateUrl: './cstreamsub2.component.html',
+  styles: [
+  ]
+})
+export class Cstreamsub2Component implements OnInit {
+
+  values: number[] = [];
+  subscription!: Subscription;
+
+  constructor(public coldService: ColdstreamService) { }
+
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.subscription = this.coldService.emitValue().subscribe(data => {
+        console.log(data)
+        this.values.push(data);
+      })
+    }, 10000);
+    setTimeout(() => {
+      this.subscription.unsubscribe()
+    }, 15000)
+
+  }
+  ngOnDestory() {
+    console.log('component has been destroyed')
+    this.subscription.unsubscribe()
+
+  }
+
+}
+............................................................................................
+				Hot Stream
+.............................................................................................
+
+Hot Observable:
+
+1.Observables that don’t wait for any subscription. 
+ They start emitting items   when created.
+
+2.They don’t emit the sequence of items again for a new subscriber.
+
+3.When an item is emitted by hot observable, all the subscribers that are   subscribed will get the emitted item at once.
+
+
+There are many ways to implement hot observables:
+
+
+converting cold into hot:
+.........................
+
+operators to convert cold into hot
+  publish
+  connect
+  share
+  multicast
+  
+
+1.ConnectableObservable : publish and connect
+  publish will start publishing data to multiple subscribers and as soon as connect is called
+
+2.share method
+  Can be shared a stream among subscribers  by call
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Subjects:
+   Used for multi casting ; built in hot Observable
+............................................................................................
+				
+import { Injectable } from '@angular/core';
+import { interval, Observable } from 'rxjs';
+import { tap, map, share } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class HotstreamService {
+
+  hotStream!: Observable<number>;
+  
+  constructor() {
+    //emit value in 1s
+    const source = interval(1000);
+    //log side effect, emit result
+    const stream = source.pipe(
+      tap(() => console.log('***starts***')),
+      map(i => i * 2),
+      share()
+    );
+    //make it hot.
+    //share observable among subscribers
+    this.hotStream = stream.pipe(share());
+  }
+  public emitValue(): Observable<number> {
+      return this.hotStream;
+  }
+
+
+}
+<h1>Hot Subscriber-1</h1>
+<ul>
+    <li *ngFor="let i of values">
+        {{i}}
+    </li>
+</ul>
+
+import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { HotstreamService } from './hotstream.service';
+
+@Component({
+  selector: 'app-hotstreamsub1',
+  templateUrl: './hotstreamsub1.component.html',
+  styles: [
+  ]
+})
+export class Hotstreamsub1Component implements OnInit {
+  subscription!: Subscription;
+  values: number[] = [];
+
+  constructor(private hotStream:HotstreamService) { }
+
+  ngOnInit(): void {
+    this.subscription = this.hotStream.emitValue().subscribe(data => {
+      this.values.push(data);
+    })
+    // setTimeout(() => {
+    //   this.subscription.unsubscribe();
+    //   console.log('unsubscribe')
+    // }, 5000)
+
+  }
+  ngOnDestory() {
+    console.log('component has been destroyed')
+    this.subscription.unsubscribe()
+  }
 
 }
 
+<h1>Hot Subscriber-2</h1>
+<ul>
+    <li *ngFor="let i of values">
+        {{i}}
+    </li>
+</ul>
+
+
+import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { HotstreamService } from './hotstream.service';
+
+@Component({
+  selector: 'app-hotstreamsub2',
+  templateUrl: './hotstreamsub2.component.html',
+  styles: [
+  ]
+})
+export class Hotstreamsub2Component implements OnInit {
+
+  subscription!: Subscription;
+  values: number[] = [];
+
+  constructor(private hotStream:HotstreamService) { }
+
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.subscription = this.hotStream.emitValue().subscribe(data => {
+        console.log(data)
+        this.values.push(data);
+      })
+    }, 10000);
+    // setTimeout(() => {
+    //   this.subscription.unsubscribe();
+    //   console.log('unsubscribe')
+    // }, 5000)
+  }
+  ngOnDestory() {
+    console.log('component has been destroyed')
+    this.subscription.unsubscribe()
+  }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+                                    Subjects
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Subject:
+
+What is a Subject?  :create the hot observable from scratch
+  
+ In RxJS Subject is a special type of Observable that allows values to be multicasted to many Observers.
+
+While plain Observables are unicast (each subscribed Observer owns an independent execution of the Observable), Subjects are multicast.
+
+"each subscribed Observer owns an independent execution of the Observable"
+   =>Every Subscribers has its own independent copy of the Object.
+   lets say 10 subscribers, 10 Observable copy is maintained.
+
+"A Subject is a special type of Observable which shares a single execution path among observers"
+
+"You can think of this as a single speaker talking at a microphone in a room full of people. Their message (the subject) is being delivered to many (multicast) people (the observers) at once. This is the basis of multicasting. Typical observables would be comparable to a 1 on 1 conversation".
+
+There are 4 variants of subjects:
+
+1.Subject - No initial value or replay behavior.
+2.AsyncSubject - Emits latest value to observers upon completion.
+3.BehaviorSubject - Requires an initial value and emits its current value (last emitted item) to new subscribers.
+4.ReplaySubject - Emits specified number of last emitted values (a replay) to new subscribers.
+...........................................................................................
+				BehaviourSubject
+
+
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SubjectService {
+
+  private behaviour = new BehaviorSubject(1);
+  constructor() { }
+
+  public broadCast(): BehaviorSubject<number> {
+    return this.behaviour;
+  }
+
+}
+
+<h1>Subject 1 {{value}}</h1>
+<button (click)="emitValue()">BroadCast To All Component</button>
+
+
+import { Component, OnInit } from '@angular/core';
+import { SubjectService } from './subject.service';
+
+@Component({
+  selector: 'app-subjectone',
+  templateUrl: './subjectone.component.html',
+  styles: [
+  ]
+})
+export class SubjectoneComponent implements OnInit {
+
+  value!: number;
+  constructor(private subject: SubjectService) { }
+
+  ngOnInit(): void {
+    this.subject.broadCast().subscribe((data) => {
+      this.value = data;
+    });
+  }
+  public emitValue() {
+    this.subject.broadCast().next(400)
+  }
+
+}
+
+<h1> Subject 2 {{value}}</h1>
+
+import { Component, OnInit } from '@angular/core';
+import { SubjectService } from './subject.service';
+
+@Component({
+  selector: 'app-subjecttwo',
+  templateUrl: './subjecttwo.component.html',
+  styles: [
+  ]
+})
+export class SubjecttwoComponent implements OnInit {
+  value!: number;
+  constructor(private subject: SubjectService) { }
+
+  ngOnInit(): void {
+    this.subject.broadCast().subscribe((data) => {
+      this.value = data;
+    });
+  }
+
+}
+.............................................................................................
+				HTTP Communication
+............................................................................................
+
+in order to make http calls with rest api servers,js offers an object called "XMLHTTPRequest"
+
+But frameworks provide abstraction over XHR object.
+
+Angular provides XHR Abstraction - @angular/common/http
+
+Angular XHR is powered with Reactive -  XHR + REACTIVE - XHR +Streaming
+
+
+HTTP MOdule:
+
+common/http :
+
+HttpClientModule :
+  This is moudle having all http related apis
+
+This HttpClientModule must be injected before interacting with http end points
+
+HttpClientModule is injected into shared module in general
+
+
+Steps:
+ng g m httpprogramming --module=app
+
+
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 
 
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule
+  ]
+})
+export class HttpprogrammingModule { }
 
 
+............................
+
+Back end setup:
+..............
+create json server 
+start server
+
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { User } from '../types/user.type';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+
+  constructor(private http: HttpClient) { }
+
+  //service api
+  public findAll(): Observable<User[]> {
+    const url = 'http://localhost:3000/users';
+    return this.http.get<User[]>(url).pipe();
+  }
+
+}
+import { Component, OnInit } from '@angular/core';
+import { User } from '../types/user.type';
+import { UserService } from './user.service';
+
+@Component({
+  selector: 'app-user',
+  templateUrl: './user.component.html',
+  styles: [
+  ]
+})
+export class UserComponent implements OnInit {
+
+  users!: Array<User>;
+  constructor(private userService: UserService) { }
+
+  ngOnInit(): void {
+    this.userService.findAll().subscribe(users => {
+      this.users = users;
+    });
+  }
+
+}
+<div>
+    <h1>Users</h1>
+    <ul>
+        <li *ngFor="let user of users">
+            <span>{{user.id}} {{user.name}}</span>
+        </li>
+    </ul>
+</div>
+............................................................................................
+				 Error handling,resilence,add other api
+
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { catchError, retry, tap } from 'rxjs/operators';
+import { User } from '../types/user.type';
+import { environment } from 'src/environments/environment';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+
+  constructor(private http: HttpClient) { }
+
+  //service api
+  public findAll(): Observable<User[]> {
+
+    const url = `${environment.url}/users`;
+    return this.http.get<User[]>(url).pipe(
+      retry(5),
+      // catchError(() => of<User[]>([{ id: 0, name: 'foo' }])
+      catchError(this.handleError<User[]>('findAll-users', this.fallback()))
+    );
+  }
+  private fallback() {
+    return [{ id: 0, name: 'foo' }];
+  }
+
+  findById(id: number): Observable<User> {
+    const url = `${environment.url}/users/${id}`;
+    return this.http.get<User>(url).pipe(
+      tap(() => console.log(`fetched user id = ${id}`)),
+      catchError(this.handleError<User>(`findByid id=${id}`))
+    )
+  }
+  //generic error handler
+  private handleError<T>(operation = "operation", result?: T) {
+    return (error: any): Observable<T> => {
+      //console.error(error);
+      return of(result as T);
+    }
+  }
+}
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { User } from '../types/user.type';
+import { UserService } from './user.service';
+
+@Component({
+  selector: 'app-user',
+  templateUrl: './user.component.html',
+  styles: [
+  ]
+})
+export class UserComponent implements OnInit {
+
+  users!: Array<User>;
+  user!: Observable<User>;
+  constructor(private userService: UserService) { }
+
+  ngOnInit(): void {
+    this.userService.findAll().subscribe(users => {
+      this.users = users;
+    });
+  }
+  showUserByid() {
+    this.user = this.userService.findById(13);
+  }
+
+}
+<div>
+    <h1>Users</h1>
+    <ul>
+        <li *ngFor="let user of users">
+            <span>{{user.id}} {{user.name}}</span>
+        </li>
+    </ul>
+
+</div>
+<div>
+    <button (click)="showUserByid()">Show User by Id</button>
+    <h1>User By Id</h1>
+    <h2>{{user  | async | json}}</h2>
+</div>
+
+UPDATE,REMOVE,DELETE: SAMPLE code :
+
+save(post: Post) {
+        const httpOptions = {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json'
+            })
+        }
+        return this.http.post<Post>(this.url, post, httpOptions)
+            .pipe(tap(() => console.log(`added Post`)),
+                catchError(this.handleError<Post>('save Post'))
+            )
+    }
+    remove(id: number): Observable<Post> {
+        const httpOptions = {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json'
+            })
+        }
+        const url = `http://localhost:3000/posts/${id}`;
+        return this.http.delete<Post>(url, httpOptions)
+            .pipe(tap(() => console.log(`deleted Post ${id}`)),
+                catchError(this.handleError<Post>('delete Post'))
+            )
+    }
+    update(id:number,post: Post):Observable<Post> {
+        console.log('service update method')
+        const url = `http://localhost:3000/posts/${id}`;
+
+        const httpOptions = {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json'
+            })
+        }
+        return this.http.put<Post>(url, post, httpOptions)
+            .pipe(tap(() => console.log(`updated Post ${post.id}`)),
+                catchError(this.handleError<any>('update Post'))
+            )
+    }
+.............................................................................................
+				 Routing
+............................................................................................
+What is routing?
+ Navigation between pages.
+
+Routing is implemented in web apps via links - hyper links.
+
+HTML 5 offers hyper links through which we can navigate from one page to another page.
+
+HTML offers an address to which we will be redirected- URL,URI.
+
+Types of navigation
+
+1.static  - html
+2.dynamic  - via server side programs
+
+In 2008, html 5 introduced dynamic navigation inside browser via javascript api called history which is object contains apis related for navigation.
+  This is brith of single page web apps.
+
+single page web apps(spa) contains one physical page we call landing page - home page
+
+How to create single page Application?
+
+SPAs use AJAX and HTML5 to create fluid and responsive Web apps, without constant page reloads. However, this means much of the work happens on the client side, in JavaScript.
+
+SPA Stack:
+
+javascript
+HTML 5
+CSS 3
+
+Frameworks and SPA :
+
+ Every client side js frameworks today offers spa implementation.
+ Angular provides a spa implemenation via "@angualr/routing" project.
+
+Routing Core Concepts:
+
+1.URL Patterns
+
+http://www.mydomain.com/index.html - static url
+http://www.mydomain.com/contactus.pdf -static url
+http://www.mydomain.com/login.aspx / login.jsp /login.php  - dynamic content url
+
+http://www.mydomain.com/api/users/comments  -  Resource based url - REST API
+
+
+Spa url patterns: hashbang url pattern
+
+http://www.mydomain.com/index.html#contactus
+http://www.mydomain.com/index.html#products
+http://www.mydomain.com/index.html#profiles
+
+spa simple syntax : here landing page and # symbol not req.which is implict.
+http://www.mydomain.com/profiles
+
+2.URLs AND page
+
+ Every url is mapped with Component which display content of page.
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+Steps:
+
+1.routermodule
+
+2.main menu
+
+3.component creation and link
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { HomeComponent } from './home.component';
+
+//mapping component with url
+const routes: Routes = [
+  {
+    path: 'home', component: HomeComponent
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+
+<h1 style="text-align: center;">Routing Application</h1>
+<hr>
+<nav>
+    <a routerLink="/home">Home</a>
+</nav>
+<hr>
+<!-- Place Holder -->
+<router-outlet></router-outlet>
+
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styles: [
+  ]
+})
+export class HomeComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+<p>home works!</p>
+..............................................................................................
+			 Page Not Found,Named Path
+..............................................................................................
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { HomeComponent } from './home.component';
+import { PageNotFoundComponent } from './page-not-found.component';
+
+//mapping component with url
+const routes: Routes = [
+  {
+    //index path - /
+    path: '', redirectTo: '/home', pathMatch: 'full'
+  },
+  {
+    //named path
+    path: 'home', component: HomeComponent
+  },
+  //page not found
+  {
+    path:'**' ,component:PageNotFoundComponent
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+.............................................................................................
+				 Dynamic urls
+..............................................................................................
+
+/users/:id  -  /users/1
+
+  {
+    path: 'greeting/:message', component: MessageComponent
+  },
+
+http://localhost:4200/greeting/hello
+
+Objects:
+RouterModule,RouterOutlet,RouterLink
+
+How to read route information inside component?
+
+ //dynamic url
+  {
+    path: 'greeting/:message', component: MessageComponent
+  },
+
+ActivatedRoute: 
+ It is object to read url information into component  like params,query params
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
+@Component({
+  selector: 'app-message',
+  templateUrl: './message.component.html',
+  styles: [
+  ]
+})
+export class MessageComponent implements OnInit {
+
+  message: string = ""
+  //to read url information: params,queryParams
+  constructor(private routerInfo: ActivatedRoute) { }
+
+  ngOnInit(): void {
+    this.routerInfo.params.subscribe(info => {
+      console.log(info);
+      this.message = info.message
+    });
+  }
+
+}
+<div>
+    <h1>{{message}}</h1>
+</div>
+.............................................................................................
+///////////////////////////////////////////////////////////////////////////////////////////
+
+                                 Nested Routing
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Nesting routes
+
+  {
+    path: 'greeter', component: GreeterComponent,
+    children: [
+      {
+       path:'',redirectTo:'/greeter/hai' , pathMatch:'full'
+      },
+      {
+        path: 'hai', component: HaiComponent,
+      },
+      {
+        path: 'hello', component: HelloComponent,
+      },
+    ]
+  }
+
+<nav>
+    <a routerLink="./hello">Hello</a> | 
+    <a routerLink="./hai">Hai</a>
+</nav>
+<router-outlet></router-outlet>
+.............................................................................................
+				Routing via code : Programmetic routing
+.............................................................................................
+
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  title = 'routingapp';
+  constructor(private router:Router){
+  }
+  public goToGreeter(){
+   this.router.navigate(['greeter'])
+  }
+}
+<button (click)="goToGreeter()">GoToGreeter</button>
+.............................................................................................
+			Modularization and Routing, Lazyloading.
+.............................................................................................
+				Forms
+............................................................................................
+/////////////////////////////////////////////////////////////////////////////////////////////
+				 Forms
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Forms are used to get input from the User.
+
+Types of Forms
+
+1.Template driven Forms
+2.Reactive forms
+
+
+Tempate Driven Forms:
+...................
+
+Steps:
+
+1.FormsModule
+
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+2.declare FormModel Object going to hold form field data
+
+export class PostFormModel{
+    constructor(public id: number, public title: string, public author: string){
+    }
+}
+
+3.Create Model Object inside component.
+
+export class AppComponent {
+  post: any;
+  constructor() {
+    this.post = new PostFormModel(Math.random(), 'Learn Angular', 'Misko')
+  }
+}
+
+Step 4 : 
+Create inital form Template
+ -Forms should have bootstrap style
+
+<div class="container">
+  <h1>Post Form</h1>
+  <form>
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input type="text" class="form-control" id="title" required>
+    </div>
+
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" class="form-control" id="name" required>
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit</button>
+
+  </form>
+</div>
+
+
+Step 5:
+
+Data binding
+   Binding textbox(form controls) with Model Object
+   We have many ways
+  1.through instance variable,$event
+  2.through [(ngModel)]="post.title"
+   ngModel = > it is an object from "FormsModule"
+   ngModel it is dto object=>data transfering between view and component.
+
+//
+Form Control value property is bound with name property of input control.
+
+<input [(ngModel)]="post.title" name="title" type="text" class="form-control" id="title" required>
+
+    <form>
+       <!--TODO: Remove this once testing over-->
+       <pre>{{post | json}}</pre>
+      <div class="form-group">
+         <label for="title">Title</label>
+         <input [(ngModel)]="post.title" name="title" type="text" class="form-control" id="title" required>
+       </div>
+       <div class="form-group">
+         <label for="name">Name</label>
+         <input [(ngModel)]="post.author" name="author" type="text" class="form-control" id="name" required>
+       </div>
+   
+       <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+
+*****************************************************************************************
+					Vaildation
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Objects In the FormsModule:
+
+NgForm : 
+
+ It is object representation of "form" element.
+ Can be used to control form validations.
+ in order to access the NgForm object inside template. You have to use template reference
+
+<form #postForm> =>postForm points HTMLForm Object
+
+ngForm is Object which inherits HTMLForm
+
+class ngForm extends HTMLForm{
+  +extra behavior=>Ready made validation code
+  +form submission behviours
+}
+
+What is meaning of this code <form #postForm>?
+
+ HTMLFORMMobject ----postPorm
+
+dummy code for the above template
+ let postForm =  new HTMLForm();
+
+what we need
+ let postForm = new NgForm()
+
+<form #postForm="ngForm"> 
+
+
+The variable postForm is now a reference to the NgForm 
+directive that governs the form as a whole.
+
+The NgForm directive:
+
+What NgForm directive? You didn't add an NgForm directive before.
+
+Angular did. Angular automatically creates and attaches
+ an NgForm directive to the <form> tag.
+
+"The NgForm directive supplements the form element with additional features. 
+
+It holds the controls you created for the elements  with an "ngModel directive" and name attribute, and monitors their properties, including their validity.
+ 
+It also has its own valid property which is true only if every contained control is valid."
+
+Note: NgForm is built Object ,has more logic for simlifying our form handling process.
+
+********************************************************************************************
+********************************************************************************************
+NgModel :
+
+ 1.Transfering data between UI and Controller .
+
+NgModel not only for data transfer, which does so many other things beyond twoway data binding.
+
+Track control(form element) state and validity with ngModel:
+............................................................
+
+Form element states:
+
+Angular provides built-in css classes to tract form control state"
+
+State 	                         Class if true 	  Class if false
+
+The control has been visited.  	  ng-touched 	    ng-untouched
+The control's value has changed.  ng-dirty 	    ng-pristine
+The control's value is valid. 	  ng-valid 	    ng-invalid
+
+State Tracking Steps:
+
+1.Look but don't touch.
+2.Click inside the name box, then click outside it.
+3.Add slashes to the end of the name.
+4.Erase the name.
+
+ng-untouched - if you dont touch
+ng-touched - if you touch
+ng-dirty - if you changed
+ng-invalid - if you remove all-empty field
+
+Step 6:
+
+Add custom CSS for visual feedback:
+
+Valid + Required - green Color
+Valid + optional - white color
+Invalid (required | optional) - red Color
+
+Angular Css:
+
+.ng-valid[required], .ng-valid.required  {
+  border-left: 5px solid #42A948; /* green */
+}
+
+.ng-invalid:not(form)  {
+  border-left: 5px solid #a94442; /* red */
+}
+
+****************************************************************************************
+
+Adding validation block to our code:
+...................................
+
+NgModel is Child Object of FormControl Object
+
+class  Input{
+ 
+}
+class NgModel extends Input{
+  //extra features : state tracking,enabling validation.
+}
+
+<input #Xx> -Here xxPoints only Input
+
+<input #Xx="ngModel"> -Here xx points ngModel
+
+      <input  [(ngModel)]="post.title" #errorMsg1="ngModel" name="title" type="text" class="form-control" id="title" required>
+
+Step 7: Add Error Block
+<div class="container">
+  <h1>Post Form</h1>
+  <form #postForm="ngForm">
+    <!--TODO: Remove this once testing over-->
+    <pre>{{post | json}}</pre>
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input [(ngModel)]="post.title" #errorMsg1="ngModel" name="title" type="text" class="form-control" id="title"
+        required>
+      <div [hidden]="errorMsg1.valid || errorMsg1.pristine" class="alert alert-danger">
+        title is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input [(ngModel)]="post.author" #errorMsg2="ngModel" name="author" type="text" class="form-control" id="name"
+        required>
+      <div [hidden]="errorMsg2.valid || errorMsg2.pristine" class="alert alert-danger">
+        Author is required
+      </div>
+    </div>
+    <button type="submit" class="btn btn-success">Submit</button>
+
+  </form>
+</div>
+
+Step 7: Disabling submit button until the whole form is valid.
+*******************************************************************************************
+
+Disabling submit button in case any validation fails:
+
+  <button type="submit" class="btn btn-success" [disabled]="!postForm.form.valid">Submit</button>
+
+*******************************************************************************************
+
+
+Step 8:Adding combo box: Select Control
+
+
+export class PostFormModel {
+    constructor(public id: number, public title: string, public author: string, public category: string) {
+    }
+}
+export class AppComponent {
+  post: any;
+  //you may get  this from services
+  categories: Array<string> = ["User interface", "MicroServices", "Devops"];
+  constructor() {
+    this.post = new PostFormModel(Math.random(), 'Learn Angular', 'Misko', this.categories[0])
+  }
+}
+
+    <div class="form-group">
+      <label for="category">Category</label>
+      <select class="form-control" id="category" name="category" 
+       [(ngModel)]="post.category">
+        <option *ngFor="let cat of categories"  [value]="cat">
+          {{cat}}
+        </option>
+      </select>
+    </div>
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Step 9: How to submit Form? and show another page
+
+Add listener in the form tag.
+ <form #postForm="ngForm" (ngSubmit)="onSubmit()">
+
+
+<div class="container">
+  <h1>Post Form</h1>
+  <div [hidden]="submitted">
+    <form #postForm="ngForm" (ngSubmit)="onSubmit()">
+      <!--TODO: Remove this once testing over-->
+      <pre>{{post | json}}</pre>
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input [(ngModel)]="post.title" #errorMsg1="ngModel" name="title" type="text" class="form-control" id="title"
+          required>
+        <div [hidden]="errorMsg1.valid || errorMsg1.pristine" class="alert alert-danger">
+          title is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input [(ngModel)]="post.author" #errorMsg2="ngModel" name="author" type="text" class="form-control" id="name"
+          required>
+        <div [hidden]="errorMsg2.valid || errorMsg2.pristine" class="alert alert-danger">
+          Author is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category</label>
+        <select class="form-control" id="category" name="category" [(ngModel)]="post.category">
+          <option *ngFor="let cat of categories" [value]="cat">
+            {{cat}}
+          </option>
+        </select>
+      </div>
+
+
+      <button type="submit" class="btn btn-success" [disabled]="!postForm.form.valid">Submit</button>
+    </form>
+  </div>
+
+  <!--Details Page-->
+  <div class="container" [hidden]="!submitted">
+    <h2>You submitted the following:</h2>
+    <div class="row">
+      <div class="col-xs-3">Id : </div>
+      <div class="col-xs-9  pull-left">{{ post.id }}</div>
+    </div>
+    <div class="row">
+      <div class="col-xs-3">Title : </div>
+      <div class="col-xs-9  pull-left">{{ post.title }}</div>
+    </div>
+    <div class="row">
+      <div class="col-xs-3">Author : </div>
+      <div class="col-xs-9 pull-left">{{ post.author }}</div>
+    </div>
+    <div class="row">
+      <div class="col-xs-3">Category : </div>
+      <div class="col-xs-9 pull-left">{{ post.category }}</div>
+    </div>
+    <br>
+    <button class="btn btn-primary" (click)="submitted=false">GoBack</button>
+  </div>
+
+</div>
+
+import { Component } from '@angular/core';
+import { PostFormModel } from './post.form.model';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  post: any;
+  submitted: boolean = false;
+  //you may get  this from services
+  categories: Array<string> = ["User interface", "MicroServices", "Devops"];
+  constructor() {
+    this.post = new PostFormModel(Math.random(), 'Learn Angular', 'Misko', this.categories[0])
+  }
+  onSubmit(){
+     alert(JSON.stringify(this.post))
+     this.submitted = true;
+  }
+}
+
+
+export class PostFormModel {
+    constructor(public id: number, public title: string, public author: string, public category: string) {
+    }
+}
+.............................................................................................
